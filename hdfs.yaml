@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  namenode:
+    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+    container_name: namenode
+    networks:
+      - hadoop-net
+    environment:
+      - CLUSTER_NAME=hadoop-cluster
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
+      - HDFS_CONF_dfs_replication=2
+    ports:
+      - "9870:9870"  # NameNode Web UI
+      - "9000:9000"  # RPC
+    volumes:
+      - namenode-data:/hadoop/dfs/name
+    command: ["sh", "-c", "hdfs namenode -format && /etc/bootstrap.sh && tail -f /dev/null"]
+
+  datanode1:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    container_name: datanode1
+    networks:
+      - hadoop-net
+    environment:
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
+      - HDFS_CONF_dfs_datanode_data_dir=file:///hadoop/dfs/data
+    ports:
+      - "9864:9864"  # DataNode Web UI
+    volumes:
+      - datanode1-data:/hadoop/dfs/data
+
+  datanode2:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    container_name: datanode2
+    networks:
+      - hadoop-net
+    environment:
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
+      - HDFS_CONF_dfs_datanode_data_dir=file:///hadoop/dfs/data
+    ports:
+      - "9865:9864"  # DataNode Web UI for DataNode 2
+    volumes:
+      - datanode2-data:/hadoop/dfs/data
+  
+  datanode3:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    container_name: datanode3
+    networks:
+      - hadoop-net
+    environment:
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
+      - HDFS_CONF_dfs_datanode_data_dir=file:///hadoop/dfs/data
+    ports:
+      - "9866:9864"  # DataNode Web UI for DataNode 3
+    volumes:
+      - datanode3-data:/hadoop/dfs/data
+
+networks:
+  hadoop-net:
+    external: true
+
+volumes:
+  namenode-data:
+  datanode1-data:
+  datanode2-data:
